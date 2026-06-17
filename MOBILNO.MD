@@ -387,3 +387,51 @@ Action icons:
 
 -------------------------------------------------------------------------
 
+# WEEK 6 - SCROLLABLE LISTS
+- Why does it matter? - every mobile app contains a list of some kind
+- the important thing is how an app renders everything 
+- before xml was used
+- now, the dev says what needs to be displayed on the screen and composable handles the rendering 
+
+## UNDERSTANDING HOW IT WORKS
+- Imagine we are using a lazy layout. We have a list that consists of 50 elements. The user has only seen 3 so far on the screen, but all 50 are already loaded. 
+- This is fine when the number of items is small, but when we are dealing with something on a larger scale it is far from ideal. 
+
+## LAZY LAYOUTS AND THE WAY THEY COMPOSE
+- Lazy layouts solve this by composing only the items that are visible on the screen, plus a small buffer of items just outside the visible area
+
+![what to pick](image-12.png)
+
+# LAZY DSL LAYOUT BUILDERS
+- Inside a lazy component block, children are delcared using dsl methods:
+1) item { } - emits a single item
+2) items(list) { } - loops over a list 
+3) itemsIndexed(list) { } - loops over a list, providing both item and its index
+
+# PRESERVING STATE VIA ITEMS
+- By default compose uses an items position index as its unique id
+- deleting or reordering items can cause data loss
+
+# LAZY LIST STATE
+- Monitors and controls real time scroll position of a lazy container
+- Allows for live data reading whether the user is actively scrolling or not
+
+# LAZY VERTICAL GRID
+- collection of items in a multi colum format that scrolls down vertically, wraps from left to right onto the next row
+- good for structured feeds like photo galleries
+
+# PROGRAMMATIC SCROLLING
+- ability to move the lists scroll position via code rather than requiring manual user touch input
+- uses coroutines / async suspend functions `scrollToItem`
+
+# GRIDCELLS OPTIONS
+- determines exactly how columns or rows are calculated and distributed
+
+# LAZY HORIZONTAL GRID
+- Fills from top to bottom first
+
+# LAZY VERTICAL / HORIZONTAL STAGGERED GRID
+- allows different dimensions for each grid, something like a pinterest board
+
+
+![LAZY VS STAGGERED](image-13.png)
