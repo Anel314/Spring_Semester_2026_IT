@@ -266,8 +266,9 @@ OutlinedTextField(
 - The child receives:
 1) current value
 2) callback to update the value
-```
-@Composable
+
+
+```@Composable
 fun NameInput(
    value: String,
    onValueChange: (String) -> Unit
@@ -277,8 +278,8 @@ fun NameInput(
        onValueChange = onValueChange,
        label = { Text("Name") }
    )
-}
-```
+}```
+
 
 - Selection components include:
 1) checkbox - multiple selection
