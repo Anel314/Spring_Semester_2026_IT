@@ -1,6 +1,6 @@
 # MOBILE PROGRAMMING - HAND WRITTEN NOTES
 ---------------------------------------------
-## WEEK 1 - INTRODUCTION
+## WEEK 2 - INTRODUCTION
 - Mobile development - process of designing, building, and maintaining software that runs on mobile devices
 
 - Mobile apps execute on resource constrained platforms, unlike computers and laptops
@@ -98,7 +98,7 @@
 
 -------------------------------------------------------------------------
 
-## WEEK 2 - KOTLIN FUNDAMENTALS
+## WEEK 3 - KOTLIN FUNDAMENTALS
 - Imperative UI programming - everything was defined using XML files, and it was connected to kotlin or java code so that ui could be manipulated
 - Declarative UI programming - instead of manually messing with the ui elements, we jut decribe how the interface should look like 
 
@@ -145,7 +145,7 @@
 
 -------------------------------------------------------------------------
 
-# WEEK 3 - COMPONENTS (BUTTONS, IMAGES, MENUS...)
+# WEEK 4 - COMPONENTS (BUTTONS, IMAGES, MENUS...)
 - Buttons - essential for event driven programming
 - System waits for a tap or a click
 - When the event occurs, a callback function is called and executed
@@ -312,7 +312,7 @@ Action icons:
 
 --------------------------------------------------------------------
 
-# WEEK 4 - UNDERSTANDING STATE IN COMPOSE
+# WEEK 5 - UNDERSTANDING STATE IN COMPOSE
 - State - any value that can chanfe and affect what the user sees on the screen
 - Can be text entered into a field, whether a checkbox is checked, tab is selected, password is visible, you get the gist
 
@@ -384,4 +384,6 @@ Action icons:
 3) temporary ui state - add item, remove, favourite, like
 4) selection and control state - password visibility, toggle sometihng
 
+
+-------------------------------------------------------------------------
 
