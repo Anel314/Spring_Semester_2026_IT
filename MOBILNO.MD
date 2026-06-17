@@ -323,3 +323,8 @@ Action icons:
 4) settings
 5) favorite
 6) menu expansion
+
+--------------------------------------------------------------------
+
+# WEEK 4 - UNDERSTANDING STATE IN COMPOSE
+- 
