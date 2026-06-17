@@ -143,3 +143,183 @@
 - also you should always break things down, do not push eveyrthing into a single file
 - make the components reusable
 
+-------------------------------------------------------------------------
+
+# WEEK 3 - COMPONENTS (BUTTONS, IMAGES, MENUS...)
+- Buttons - essential for event driven programming
+- System waits for a tap or a click
+- When the event occurs, a callback function is called and executed
+- This is attached through the `onClick`
+```
+Button(onClick = { /* action */ }) {
+   Text("Click me")
+}
+```
+
+- Default button - most important actions, such as save, submit or confirm
+```
+Button(
+   onClick = { /* save data */ }
+) {
+   Text("Save")
+}
+```
+
+- Text button - lighter than the default button, used for secondary actions such as skip, dismiss or learn more
+```
+TextButton(
+   onClick = { /* dismiss dialog */ }
+) {
+   Text("Dismiss")
+}
+```
+
+- Outlined button - used for secondary actions that are important but should not visually compete with the primary button, like cancel, edit or go back 
+```OutlinedButton(
+   onClick = { /* cancel action */ }
+) {
+   Text("Cancel")
+}
+
+```
+
+- Elevated button - kinda elevated from the background, similar to normal button but adds depth and can be used when a desiner wishes to draw a stronger attention to a specific action 
+```
+ElevatedButton(
+   onClick = { /* continue process */ }
+) {
+   Text("Continue")
+}
+```
+
+- Icon button - for compact actions, delete, favorite, search or settings
+```
+IconButton(
+   onClick = { /* delete item */ }
+) {
+   Icon(
+       imageVector = Icons.Default.Delete,
+       contentDescription = "Delete"
+   )
+}
+```
+
+- Floating action button - used to highlight actions, such as add, create or compose
+```
+FloatingActionButton(
+   onClick = { /* add new item */ }
+) {
+   Icon(
+       imageVector = Icons.Default.Add,
+       contentDescription = "Add"
+   )
+}
+```
+
+
+![button hierarchy](image-8.png)
+
+
+
+- Buttons are stateless in sense that they do not deal with business logic, but they emit events 
+
+- Stateless composable: receives values and callbacks from parent
+- Stateful composable: owsn and manages some parts of the ui state
+
+- Text input is usually controlled by state
+
+
+- Text field is the standard input field 
+```
+TextField(
+   value = email,
+   onValueChange = { email = it },
+   label = { Text("Email") },
+   placeholder = { Text("Enter your email") }
+)
+```
+
+- Outlined text field has the same behaviour but outlined background instead of a filled one 
+```OutlinedTextField(
+   value = questTitle,
+   onValueChange = { questTitle = it },
+   label = { Text("Quest Title") },
+   modifier = Modifier.fillMaxWidth(),
+   singleLine = true
+)```
+
+- Label - assocaited with a filed
+- Placeholder - appears when there is no text inside of the field 
+
+- Password input and visual transformation
+```
+OutlinedTextField(
+   value = password,
+   onValueChange = { password = it },
+   label = { Text("Password") },
+   visualTransformation = PasswordVisualTransformation()
+)
+```
+
+
+- State hoisting - instead of keepin the state hidden inside one of the composables, it is recomendded to move the state upward to a parent 
+- The child receives:
+1) current value
+2) callback to update the value
+```
+@Composable
+fun NameInput(
+   value: String,
+   onValueChange: (String) -> Unit
+) {
+   OutlinedTextField(
+       value = value,
+       onValueChange = onValueChange,
+       label = { Text("Name") }
+   )
+}
+```
+
+- Selection components include:
+1) checkbox - multiple selection
+2) radio buttons - single selection
+3) radio button group 
+4) switch - binary toggle
+5) slider - range selection 
+
+
+- Dealing with images:
+1) crop - gotta make things look polished
+2) fit - when the whole image must remain visible
+3) fillbounds - when exact container filling matters more than proportions
+4) inside - when avoiding enlargement is important 
+
+- Aspect ratio - helps to make sure an image maintians a specific ration during layout
+
+- Scaling: how the image is drawn inside the space
+- Clipping: the shape of the visible region 
+
+- Icon composables:
+1) trash 
+2) plus
+3) heart
+4) arrow
+5) menu
+
+Menus:
+1) dropdown menu
+2) topapp bar 
+3) bottomapp bar
+
+Dialogs: 
+1) confrim dialog
+2) custom dialog
+3) alert dialog 
+
+Action icons:
+1) search
+2) sort
+3) delete
+4) settings
+5) favorite
+6) menu expansion
