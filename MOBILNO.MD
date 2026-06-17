@@ -1,0 +1,97 @@
+# MOBILE PROGRAMMING - HAND WRITTEN NOTES
+---------------------------------------------
+## WEEK 1 - INTRODUCTION
+- Mobile development - process of designing, building, and maintaining software that runs on mobile devices
+
+- Mobile apps execute on resource constrained platforms, unlike computers and laptops
+
+- Android is a layered software stack built on top of the Linux kernel
+
+![android architecture](image.png)
+
+- Linux kernel - foundation of everything, responsibe for low level concerns such as process scheduling, memory management, hardware devices, drivers and so on
+
+- Hardware abstraction layer (HAL) - set of interfaces that allow higher android frameworks to communicate with device specific hardware implementations (camera, bluetooth)
+
+- Android runtime libaries - runtime environment in which apps exectute, typically from dex bytecode 
+
+- Native c/cpp libraries - performance critical system components and libaries that underpin many capabilities and are exposed to apps
+
+- Java API framework - main set of developer facing APIs and system services used to build apps
+
+- System apps - core apps shipped with the device
+
+- Activities / screens - user facing screens that structure navigation and interaction
+
+- Resources - no code assets such as UI strings, images, and config values
+
+- Manifest - a config file that declares the app's key components and capabilities to the system 
+
+- The system decides when UI containers are made, not the actual code
+
+- Activity - a single screen level container made by the android os. Provies window where ui is drawn and acts as a coordination point for navigation, permissions, and system interactions
+
+![android lifecycle](image-1.png)
+
+- onCreate() - activity instance is being created
+- onStart() - activity becomes visible
+- onResume() - activity is in the foreground
+- onPause() - activity is losing focus, but might still be partially visible
+- onStop() - no longer visible
+- onDestroy() - an activity is finishing or being removed
+- onRestart() - returning after being stopped
+
+- Module - a project is organized into modules, where each module represents a discrete unit of functionality with its own resources and settings
+
+- Srouce sets - grouping code and resources by purpose 
+
+- Configuration - every android project has this one, defins how the project is built
+
+- Gradle - build automation tool used by Android Studio, essential for compiling code, packaging resources, producing APK / AAB outputs, running tests and preparing release builds
+
+- Gradle handles:
+1) dependency management
+2) build tasks (compiling, packaging, testing, cleaning previous outputs)
+3) build variants (debug, release)
+
+- Root gradle build - for all configs used across the project
+- Moduel level gradle - defines module settings, SDK levels, build types and dependencies
+
+- Dependency - external library that your app uses
+
+- libs.versions.toml - used for storing plugin versions
+
+- AVD (android virtual device) - software based android device running on your computer 
+- You still gotta test on an actual device tho 
+
+- Debugging - finding failures in software 
+- Reproduce, isolate, explain, fix, verify 
+
+- Compile time errors - compilers catches before the app runs (typos, syntax errors)
+- Runtime errors - app compiles, but fails to run (nullptrexception, or some other type of exception is thrown)
+
+- Use breakpoints to debug
+
+- Use logcat to view logs for more info:
+1) verbose (v) - very detailed high volume tracing
+2) debug (d) - more for developers
+3) info (i) - used for imortant events (user signed in, sync failed)
+4) warn (w) - something unexpected happened, but the code still runs (deprecated package)
+5) error (e) - a failure that prevented something from working correctly
+
+- DO NOT LOG SENSITIVE DATA (obviously)
+
+- Stakc trace - printed into logcat after an event happens, tells you what went wrong and where
+
+- Call stack - list of methods and functions that were active when something happened 
+
+- Step operations - when adding a breakpoint during debugging:
+1) step over - runs the current line and movees to the next without entering any function, used when you trust the function
+2) step into - if the current line calls a function, this takes you inside that function
+3) step out - finishes running the entire function and returns to the line after the call in the function that called it earlier
+
+- Profiling - very imporant, measures what your app is doing while it runs, so you can find where time and resources are being spent 
+
+- Jank - stuttering or uneven scrolling / animations, ui looks choppy
+- Freeze / hangs - the app stops responding for a moment
+- Excessive memory use - the app feels slower over time 
