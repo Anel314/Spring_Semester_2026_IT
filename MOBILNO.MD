@@ -252,14 +252,7 @@ TextField(
 - Placeholder - appears when there is no text inside of the field 
 
 - Password input and visual transformation
-```
-OutlinedTextField(
-   value = password,
-   onValueChange = { password = it },
-   label = { Text("Password") },
-   visualTransformation = PasswordVisualTransformation()
-)
-```
+![alt text](image-10.png)
 
 
 - State hoisting - instead of keepin the state hidden inside one of the composables, it is recomendded to move the state upward to a parent 
