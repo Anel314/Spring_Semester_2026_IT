@@ -95,3 +95,51 @@
 - Jank - stuttering or uneven scrolling / animations, ui looks choppy
 - Freeze / hangs - the app stops responding for a moment
 - Excessive memory use - the app feels slower over time 
+
+-------------------------------------------------------------------------
+
+## WEEK 2 - KOTLIN FUNDAMENTALS
+- Imperative UI programming - everything was defined using XML files, and it was connected to kotlin or java code so that ui could be manipulated
+- Declarative UI programming - instead of manually messing with the ui elements, we jut decribe how the interface should look like 
+
+- Composable function - a function annotated with `@Composable`, and informs the screen the element contributes to the ui hierarchy 
+- You can combine composables, have them receive data, call other composables etc.
+
+- `setContent` is a function that establishes the entry point of the compose ui hierarchy
+
+![setcontent](image-2.png)
+
+- `@Preview` - visualizing composable functoins without launching an emulator 
+![preview](image-3.png)
+
+![column, row, box](image-4.png)
+- Column stacks elements on top of each other (and you can control how they look)
+![vertical arrangement](image-5.png)
+
+- Row stacks elements next to each other
+![horizontal arrangement](image-6.png)
+
+- Box stacks elements in a way they can overlap
+
+- Modifier - collection of instructions that change how a composable behaves or is rendered
+- So we are modifiying ui without touching composable's internal logic 
+- Modifiers can control:
+1) layout properties - size, padding, position
+2) visual appearance 
+3) interaction behaviour
+4) alignment and spacing
+5) drawing and clipping effects
+![modifier](image-7.png)
+
+- MODIFIER ORDER MATTERS!!!!
+
+- Other used ui elements in compose are:
+1) text
+2) image
+3) icon
+4) spacer
+5) surface and card 
+
+- also you should always break things down, do not push eveyrthing into a single file
+- make the components reusable
+
