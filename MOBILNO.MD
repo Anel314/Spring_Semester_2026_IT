@@ -240,13 +240,15 @@ TextField(
 ```
 
 - Outlined text field has the same behaviour but outlined background instead of a filled one 
+
 ```OutlinedTextField(
    value = questTitle,
    onValueChange = { questTitle = it },
    label = { Text("Quest Title") },
    modifier = Modifier.fillMaxWidth(),
    singleLine = true
-)```
+)
+```
 
 - Label - assocaited with a filed
 - Placeholder - appears when there is no text inside of the field 
