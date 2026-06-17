@@ -268,17 +268,7 @@ OutlinedTextField(
 2) callback to update the value
 
 
-```@Composable
-fun NameInput(
-   value: String,
-   onValueChange: (String) -> Unit
-) {
-   OutlinedTextField(
-       value = value,
-       onValueChange = onValueChange,
-       label = { Text("Name") }
-   )
-}```
+![alt text](image-9.png)
 
 
 - Selection components include:
