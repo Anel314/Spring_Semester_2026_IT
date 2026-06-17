@@ -313,4 +313,75 @@ Action icons:
 --------------------------------------------------------------------
 
 # WEEK 4 - UNDERSTANDING STATE IN COMPOSE
-- 
+- State - any value that can chanfe and affect what the user sees on the screen
+- Can be text entered into a field, whether a checkbox is checked, tab is selected, password is visible, you get the gist
+
+- The UI should reflect the current state
+- The developer updates the state, and compose deals with the UI
+
+- Composition: when a compose screen is shown for the first time, compose runs the composable functions and builds the UI
+- Recomposition: later when a state changes, compose runs the affected composable again and updates the ui
+- Smart recomposition: updating only the affected parts, also known as selective recomposition
+
+## mutableStateOf()
+- creates a state value that compose can track, when the value changes it knows it needs an update
+- so the whole point is to make a value observable by compose
+
+## remember
+- keeps a value in memory while the composable stays in composition
+- without it, the value we created in a composable would be recreated every single time 
+
+## rememberSaveable
+- sometimes keeping the state during recomposition does not cut it
+- the screen may be recreated sometimes because of config changes, such as device rotation
+- works like `remember`, but it also tries to restore the value after the change happens 
+
+## delegate state syntax - by keyword
+- when working with state, you will often see `by` keyword
+- used to make state code easier to read
+- without it, we access stuff via .value()
+- with it, the syntax becomes cleaner
+
+## Derived State
+- when a value can be calculated from other state values 
+- keeps ui clean
+
+## derivedStateOf
+- we use that for derived state
+
+## stateful composable
+- keeps and updates its own state inside itself
+
+## stateless composable
+- does not keep the state, receives it through parameters, sends user actions back through callbacks.
+
+![stateful/stateless](image-11.png)
+
+## state hoisting
+- moving state from child composable to parent composable
+- child does not handle anything
+- it only receives the value it should display, and when user interacts with it it uses callbacks to communicate
+
+## SSOT single source of truth
+- one piece of important state should be in one place only
+- this is useful because if we were to store a same logical value in multiple places, we might create incosistencies across UI
+
+## IMPORTANT - DATA GOES DOWN, EVENT GOES UP / UNIDIRECTIONAL DATA FLOW
+- what we explained earlier
+- data goes down from parent to child
+- event goes from child to parent 
+
+## important note
+- even though we can use state hoisting, does not mean we should all the time
+- if it's something really small, it really is not necessary
+
+## MANAGING DIFFERENT KINDS OF STATE 
+- not all state plays the same role
+- that is why we need some sort of classification
+- types:
+1) form state - login, register...
+2) collection state - list of tasks, notes, contacts
+3) temporary ui state - add item, remove, favourite, like
+4) selection and control state - password visibility, toggle sometihng
+
+
