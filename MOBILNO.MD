@@ -496,3 +496,166 @@ Action icons:
 # PASSING COMPLEX DATA
 - do not pass complex data, use a lightweight unique id or integer
 - the screen should only accept that id and handle data retrieval directly from viewmodel
+
+-------------------------------------------------------------------------
+
+# WEEK 8 - VIEWMODEL AND STATE MANAGEMENT IN COMPOSE
+# WHY?
+- Android treats screen rotation as a configuration change
+- So it destroys the current activity and makes a new one (oncreate + ondestroy)
+- rememberSaveable is not enough either, because it has some limitations:
+1) size limit of 1 MB, so a list of objects would be far too large
+2) type restriction - only primitives
+3) process death - if OS kills your process, nothing can save it
+4) no business logic - state that depends on repository calls, validation or computation belongs somewhere that can hold logic, not jut data 
+
+# WHAT IS A VIEWMODEL
+- viewmodel stores and manages ui related data in a life cycle conscious way
+- it is not attached to activity instance
+- it is stored in a separate structure called the `ViewModelStore`
+
+# REQUESTING A VIEW MODEL
+- do not call its constructor ridrectly
+- that makes a plain object with no lifecycle awareness
+- you request it through a framework, which either gets the existing instance or makes a new one 
+
+```
+@Composable
+fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
+    // viewModel() returns the existing instance after rotation
+    // It never creates a second one if one already exists
+}
+```
+
+# VIEWMODEL LIFETIME
+- Survives as long as its associated screen is on the backstack 
+
+# WHAT BELONGS TO THE VIEWMODEL?
+- Business state
+- Anything UI related belongs to the screens 
+
+# MVVM
+- Model -> View -> ViewModel 
+- separates an application in three different layers
+- Data flow - `model -> viewmodel -> view`
+- User interaction; `view -> viewmodel -> model`
+
+# MODEL
+- responsible for all the data
+- how to fetch, store, everything
+- repositories, room database, retrofit api, datastore
+- has no knowledge of ui whatsoever
+
+# VIEWMODEL
+- coordinator
+- requests data from model
+- applies business logic such as filtering or validation
+- exposes the result as an observable state
+- again, holds no connection to the UI
+
+# VIEW
+- our composables
+- only job is to read state from the viewmodel and display it
+- when the user interacts with the screen, the composable calls a function on the viewmodel
+- it never modifies data directly and never talks to the model layer 
+
+# DEPENDENCY
+- any object that a class needs to work with
+- a class declares what it needs on the constructor 
+- then, the di framework is responsible for creating and providing those dependencies 
+
+# HILT
+- dependency injection frameowrk built on top of dagger
+- reads annotations above classes and generates all the code automatically
+- you do not need to write anything yourself, just delcare what you need
+
+# FOUR HILT ANNOTATIONS 
+- `@HiltAndroidApp`- goes on the custom application class. starting point for hilt, and it tells dependency graph where the application starts before any activity or screen is loaded
+- `@AndroidEntryPoint` - goes on any component that will host composables that use hilt provided viewmodels. so tells the hilt that the activity is a place where injected objects can be requested.
+- `@Inject` - you are telling hilt that when something asks for this type, use this constructor to build an instance. this is how a repo or any other class becomes injectable, hilt knows how to create it. 
+- `@HiltViewModel`- this combined with inject on the viewmodel tells hilt to manage the viewmodels creation and injection. hilt reads the viewmodel, sees what dependencies are needed and finds the corresponding inject annotation on those and generates code. 
+
+# STATE FLOW
+- plain variables cannot be observed or survive rotation
+- state flow holds a single valye and notifies all observers on value change
+- characteristics:
+1) always holds a value
+2) hot, it exists and runs whether someone is watching it or not
+3) only emits on change
+4) thread safe 
+- the convention is to have two declarations for every piece of state, private and public 
+
+```
+class CounterViewModel : ViewModel() {
+
+    // Private -- only CounterViewModel can change this
+    private val _count = MutableStateFlow(0)
+
+    // Public -- composables observe this, but cannot write to it
+    val count: StateFlow<Int> = _count.asStateFlow()
+
+    fun increment() {
+        _count.value = _count.value + 1   // Only ViewModel writes here
+    }
+}
+```
+
+# COLLECTING STATE FLOW
+- `collectAsStateWithLifecycle`
+- `collectAsState`
+- the first one is preffered because it pauses collection when the app goes to the background 
+- saves battery and prevents unnecessary work 
+
+# SEALED INTERFACE
+- you declare all possible subtypes in a single file
+- the compiler knows every subtype that exists 
+
+# DATA OBJECT VS DATA CLASS
+- when a state has no data to carry, we use `data object`
+- its a singleton, and there is only instance of it in the memory, good for loading or init that carry no payload
+- when a state needs to hold data, use `data class`
+
+# RENDERING STATE WITH WHEN EXPRESSION 
+```
+when (uiState) {
+    is LoginUiState.Loading -> {
+        // Show a loading spinner
+        CircularProgressIndicator()
+    }
+    is LoginUiState.Error -> {
+        // Show the error message
+        Text(text = (uiState as LoginUiState.Error).message)
+    }
+    is LoginUiState.Success -> {
+        // Show success content
+    }
+    is LoginUiState.Init -> {
+        // Show the default form
+    }
+}
+```
+
+# WHY COROUTINES ON VIEWMODEL
+- everything that happens, loading data, validation, writing to database cannot happen on main thread
+- the app freezes
+- it is better to do that in an async way without blocking anything
+
+# WHAT IS VIEWMODELSCOPE 
+- every viewmodel has a viewmodel scope - coroutine scope
+- it is tied to its lifetime
+- cancelled when viewmodel is ceared
+- prevents memory leaks and makes sure no background outlives a screen
+
+# CHANNEL 
+- use it to deliver an event exactly once to a single collector and does not replay past events 
+- Channel.BUFFERED means events are stored in a buffer and not lost 
+
+# COLLECTING EVENTS
+- `LauncedEffect(unit)`
+
+# INIT 
+- runs exactly once when its created
+- used when screens need data loaded automatically as they appear 
+
+
+![all definitions](image-14.png)
