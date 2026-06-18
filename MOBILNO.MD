@@ -435,3 +435,64 @@ Action icons:
 
 
 ![LAZY VS STAGGERED](image-13.png)
+
+
+------------------------------------------------------------------------
+
+# WEEK 7 - NAVIGATION AND INTENTS
+# HOW IT USED TO WORK
+- fragmentmanager was used before
+
+# WHAT NAVIGATION SOLVES
+- provides a single map of your entire application flow while automatically managing the back stack when a user hits the back button
+- type safe argument parsing between screens
+- prevents runtime crashes
+
+# NAVCONTROLLER
+- brain of the architecture
+- tracks the users history, manages backstack, coordinates display switches
+- must be instantiated at the root of ui tree using `rememberNavController`
+- must be passed downard, because we want a simple consistent pipeline
+
+# NAVHOST
+- placeholder that swaps screen composables in and out depending where the user navigates
+- requires `NavController` instance to listen for changes
+- also needs `startDestination`
+
+# NAVGRAPH DESTINATIONS
+- contains every single endpoint withinn the app
+- declared in navhost builder block
+- a destination is an individual composable screen tied to a route string that acts as its identifier on the map
+
+# COMPOSABLE() FUNCTION
+- builder method
+- used inside navhost to register scrreen desintation into the entire map
+- lambda block with navbakcstackentry
+- allows extraction of cinoming arguments from the route string to securely scope a local viewmodel tothat screens lifecycle
+
+# ROUTES AS STRINGS
+- routes use string paths for simple windows and bracketed pplaceholder notation to signal that an essential piece of text data must be embedded within the path during transitions
+
+# GOING BACK: NAVIGATEUP() AND POPBACKSTACK()
+- `popBackStack` drops the top screen and fails if the stack is empty
+- `MapsUp` is intelligent, context aware and can exit to a parent app if no internal screens remain
+
+# OBSERVING CURRENT DESINTATION
+- `navController.currentBackStackEntryAsState()` real time observer for persistent screen
+
+# REQUIRED ARGUMENTS
+- mandatory requirements within a route string
+- like path variables inside a link
+
+# NAVTYPE
+- tells the nav system how to interpret raw route path texxt into a strict kotlin primitive type (we have string, int and bool)
+
+# OPTIONAL ARGUMENTS
+- use query string formatting, and must declare an explicit default fallback value
+
+# MULTIPLE ARGUMENTS IN ONE ROUTE
+- you can have several arguments in one route by appending placeholders sequentially along the string path
+
+# PASSING COMPLEX DATA
+- do not pass complex data, use a lightweight unique id or integer
+- the screen should only accept that id and handle data retrieval directly from viewmodel
