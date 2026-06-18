@@ -659,3 +659,83 @@ when (uiState) {
 
 
 ![all definitions](image-14.png)
+
+----------------------------------------------------------------------
+
+# WEEK 9 - COROUTINES AND ASYNC PROGRAMMING
+- DO NOT USE THE MAIN THREAD FOR EVERYTHING
+- Google play uses ANR (application not responding)
+- anything above 0.47% is bad 
+
+![possible solutions](image-15.png)
+
+# COROUTINE
+- a unit of work that can suspend itself
+- can pause its own execution without blocking the thread its running on
+- when the coroutine suspends, the thread it was using becomes free to do other work 
+- COROUTINE IS NOT THE SAME THING AS A THREAD
+- coroutines can share a small number of threads 
+
+![the difference](image-16.png)
+
+# SUSPEND KEYWORD
+- tells modifier a function may pause at some point without blocking the main thread
+1) rule 1: suspend function can only be called from another suspend function
+2) rule 2: calling a suspend function does not switch threads, that is the job of a dispatcher  
+
+- `launch` - when you want to start a coroutine but you do not need the result. used when the result is handled by state.
+- `async` - when you need to start a corotuine that will produce a small result. use `Deffered<T>` a promise of a future value, and you can call `await()` to get the result
+- `runBlocking` - for testing purposes only. 
+
+# DISPATCHERS
+- determines which thread or thread pool a coroutine runs on
+- a corouinte starts on the main thread by default
+- for work that has heavy operations, you must switch to a dispatcher
+- choosing the wrong dispatcher can happen 
+
+![dispatchers](image-17.png)
+
+- you can switch dispatchers using `withContext()`
+
+- the thing with context switching is it returns back to the main thread after the work is done 
+
+# FLOW 
+- a suspend function can only return one value when it is done
+- but in a real world, many valus are emitted over time
+- for these cases we have `Flow<T>`
+- you can think of this as a suspend function that returns multiple times
+
+# COLD STREAM
+- needs to be created
+- everything starts from the beginning each time
+- for one collector that computation runs once
+- for two it runs twice
+- api calls, file reads
+
+# HOT STREAM
+- already running regardless of collectors
+- gets the current state of events
+- many collectors share same stream
+- no duplicate work
+- like live tv, its still there whether you watch it or not 
+- ui state, events, viewmodel
+- so basically for ui communication 
+
+# FLOP OPERATORS
+- `.map`
+- `.filter`
+- `.take`
+- `.onEach`
+- `.debounce`
+- `.distinctUntilChange`
+- `.collect`
+- `.toList`
+- `.first`
+- `.single`
+- `.count`
+- `.reduce`
+
+# SHARED FLOW
+- when you need to send an event to the ui that should be processed exactly once 
+- has no current value
+- good for navigation, snackbar messages, dialog triggers
