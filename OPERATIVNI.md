@@ -288,3 +288,90 @@
 3) efficiency
 - One thing though, the OS cannot see into the future to know how long a job will run
 - That is what the MLFQ is there for 
+
+---
+
+### WEEK 4 - MLFQ AND PROPORTIONAL SHARE SCHEDULING
+#### CORE PROBLEM
+- As said before the OS does not know how long a job might actually take to complete
+- SJF and STCF require previous knowledge of how jobs will behave exactly, which is unrealistic 
+- Therefore schedulers must learn and adapt over time 
+
+#### MLFQ
+- Multi level feedback queue
+- It learns from history of a process to predict the future requirements
+- It uses multiple queues with different priortiy levels
+- So over time optimal strategies are designed 
+
+#### HOW IT WORKS
+- Each queue represents a priority level
+- Higher queues have higher priority
+- Jobs within the same queue are schedules with RR
+- So we are making sure that everything is as fair as it can be 
+
+#### THE LEARNING PROCESS
+- Instead of assigning a fixed priority, theMLFQ observes behavior over time
+- Processes that frequently let go of the CPU to wait for an I/O are at a high priority
+- Processes that hog the CPU for an extensive amount of time are placed at a lower priority
+
+#### INITIAL PLACEMENT
+- Every job is initially at a high priority
+- So we are assuming the job is short, but then we observe it over time
+- If a job manages to use up the entiretime slice while running, it gets marked as an intense job and gets demoted
+- However if it gives up the CPU before its done it gets promoted
+
+#### VULNERABILITES
+- Starvation - a constant stream of interactive jobs consume all the CPU time, leaving lower priority jobs with NOTHING
+- Processes can also trick the OS
+- Also a program might change from an intense one to interactive one, but it can get stuck at the low priority
+
+#### SOLUTION
+- Periodically all jobs are moved back to the highest priority
+- This is known as the priority boost
+- Starvation solved
+
+#### WHO USES MLFQ
+- Many systems
+- BSD variants, Solaris, Windows systems, macOS
+
+#### FAIR SHARE SCHEDULING
+- Everyone gets a specific percentage of the CPU
+- Kind of like round robin if u think of it
+- The aim is to have probabilistic and deterministic fairness
+
+#### LOTTERY SCHEDULING
+- Tickets are used as a way to represent the share of a resources a process should receive
+- The scheduler randomly selects a ticket to decide which process runs
+- More tickets increase the probability of a job going again 
+- The only thing you need for this is a random number generator and a list of active processes
+- It is probabilistically correct, so the scheduler becomes highly fair over time
+
+#### STRIDE SCHEDULING
+- Each process has a stride value inversely proportional to its ticket count
+- The scheduler lets the process withh the lowest accumulated pass value go
+
+#### LOTTERY VS STRIDE
+- Stride is more precise and will achieve the exact same proprtion at the end of every cycle
+- Loterry is preffered because it needs no global state and handles new processes in an easier way
+
+#### WHEN DO WE USE PROPORTIONAL SHARING
+- In data centers where resource allocation must be defined
+
+#### LIMITATIONS
+- Assigning tickets fairly is hard
+- Also heavy i/o workloads are not handled very well either
+- So this is less common in general purpose OS
+- Lottery and Stride is elegant, but still MLFQ is widely preferred
+
+### CFS completely fair scheduler
+- Default Linux scheduler
+- Divides CPU time fairly across all processes
+- Does not use queues, but tracks how much total cpu time each process has used
+- The process with the least fair share is always selected the first 
+- Assigns each process a value with vruntime
+- This is all stored in a red black tree
+
+#### NICE VALUE AND PRIORITY IN CFS
+- Each process has a nice value either set by the user or system
+- Determines relative priority
+- Lower nice value means higher priority
