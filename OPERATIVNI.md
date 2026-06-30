@@ -191,3 +191,100 @@
 - Init is the first user space process started by the OS at the very start of the system boot
 - It has PID value 1 and becomes parent of all the orphan processes 
 - Handles everything that is essential for a system to run correctly 
+
+---
+
+### WEEK 3 - INTRO TO CPU SCHEDULING
+#### WHAT IS IT
+- The OS decides which process should use the CPU at any given moment
+- The scheduler determines how the CPU is shared
+
+#### WHY THO?
+- Many processes compete for CPU resources
+- We cannot have them all attack at the same time
+- We need some sort of hierarchy 
+
+#### CPU VIRTUALIZATION / TIME SHARING
+- The OS must share the physical hardware among many processes 
+- The system switches quickly between them so it appears they are running at the same time
+- This is known as time sharing 
+
+#### LIMIT DIRECT EXECUTION
+- OS sometimes allows user programs to execute directly on the CPU for efficiency
+- This is known as limited direction execution 
+- OS is in control over the resources
+- This is all very fast, BUT how can an OS stop a program to switch tasks 
+
+#### SYSTEM CALLS
+- As we know user mode cannot really interact with the kernel, so we make a system call
+- BAM easy
+
+#### OLDER COOPERATIVE SYSTEMS
+- The OS used to trust that the process will give up the control over the CPU
+- not a smart idea, i mean duh
+- An infinite loop can happen and then what, the OS may never get the control back again
+
+#### NON COOPERATIVE APPROACH
+- Timer interrupt stops the current running process for a predefined interval
+- This is much much better
+
+#### CONTEXT SWITCHING
+- When the scheduler decides to run a different process, that is a context switch
+- The state is saved to the register so once the process is resumed it can work nicely as it did before
+- Program counters and stack pointers are used for this
+
+#### HARDWARE VS SOFTWARE REGISTER SAVE
+- Hardware save happens instantly when an exception or interrupt is triggered, only the essentials
+- Software save is written by the programmer, everyuthing else that is left behind
+
+#### COST OF CONTEXT SWITCHING
+- Expensive due to state save 
+- We want this minimized
+
+#### SCHEDULING POLICY
+- Who goes next essentially
+- Different policies have differnt goals in mind
+
+#### SCHEDULING METRIC
+- Metric used to measure the efectiveness of the policu
+- One good example is turnaround time 
+
+#### FIFO SCHEDULING
+- First in first out, or better known as FCFS first come first serve
+- Whoever arrives first goes first and finishes entirely
+- This is not a good idea because there are different job lengths and a huge job can go first and then everyone else has to wait
+
+### SJF shortest job first
+- Self explanatory
+- Whoever has the smallest burts goes first
+- There is non preemptive and preemptive
+- Basic SJF and FIFO are non preemptive
+
+#### STCF shortest time to completion
+- preemptive version of sjf 
+- nothing fancy
+- preempt means to interrupt if a process with shorter execution time is found
+
+#### RESPONSE TIME METRIC
+- `Tresponse = Tfirstfun - Tarrival`
+- measuring the delay between when a job arrives and when its first scheduled to run
+- STCF is great for overall performance, but can be poor for response time
+
+#### ROUND ROBIN
+- Processes get a time quantum / slice
+- They all run for an equal amount of time
+- The lenght of the time slice is very important
+- If the time slice is shorter, improves responsiveness but increases context switching overhead
+- If the time slice is longer, overhead is reduces but also the responsiveness might be as well which is not ideal
+
+#### ADDING I/O OPERATIONS
+- A scheduler should never let the CPU sit idel while a process is blocked and waiting for a slow i/o operation
+- When a job initiates a disk request, the OS should move that process to the blocked state and schedule a different job
+
+#### SCHEDULING TRADE OFFS
+- Multiple things to be balanced:
+1) fairness
+2) responsiveness
+3) efficiency
+- One thing though, the OS cannot see into the future to know how long a job will run
+- That is what the MLFQ is there for 
