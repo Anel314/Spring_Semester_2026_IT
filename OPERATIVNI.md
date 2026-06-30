@@ -113,3 +113,81 @@
 - Type 1 hypervisors run on the hardware, also known as bare metal
 - Type 2 run as an app on top of the OS
 - This is all widely used in cloud computing 
+
+---
+
+### WEEK 2 - PROCESSES AND SYSTEM CALLS
+#### PRIMARY OS DESIGN GOALS
+- Abstraction is a fundamental concept
+- The OS must provide high performance and minimize overhead
+- Isolation makes sure there is no unintended behaviour of one application, so that it cannot harm others as well
+
+#### CPU MODES: USER VS KERNEL
+- The OS runs in kernel mode, and grants access to all hardware features
+- User programs run in restricted user mode to prevent them from crashing anything
+
+#### SYSTEM CALLS AND TRAPS
+- User requests something from the OS by using system calls and a special instruction called a `TRAP`
+- This switches the cpu from user mode to kernel mode, where the os handles the request safely and then returns back to user mode
+
+#### PROCESS ABSTRACTION
+- A process is a program in exection
+- Each progam has its address space, which contains program code, data and stack 
+- Process table is used to keep track of every process state 
+- This is also known as PCB - process control block
+
+#### CPU REGISTERS 
+- PC aka program counter shows which instruction is being executed by the program
+- Stack and frame pointer are used to manage local variables, function params, and return adresses
+- Also the state of the register must be saved so when its stopped it can later resume whatever it was doing 
+
+#### PROCESS API
+- Set of interfaces that let users and apps manage processes
+- They can do things like process creation or deletion
+- Also status updates are available
+
+#### HOW IT WORKS
+- First a program code is loaded (lazy loading now, eager loading then)
+- Then, memory allocation (stack, heap, code)
+- Finally, system sets up 3 descriptors: (input output error) so the program can communicate with the user via terminal
+
+#### STACK VS HEAP
+- Stack - grows down, local variables and function calls, parameters return adresses
+- Heap - grows up, dinamically allocated data (linked lists, trees)
+
+#### PROCESS STATE
+- Running - actively executing
+- Ready - preparing to run, while the OS chose another process
+- Blocked - performs an OP, and now waits for I/O
+
+#### SCHEDULING
+- Moving a process from ready state to runnning is called scheduling
+- When a process gets blocked so another one can go its called descheduling
+
+#### POLICIES VS MECHANISMS
+- Mechanisms are low level methods or protocols that implement some functionality
+- Policies are algortihms for making some kind of decision within the OS
+
+#### FORK CALL
+- Primary way to make a new process
+- Creates a copy of an existing program
+- The child process gets value 0, while the parent != 0 because its holding the PID of the child
+
+#### WAIT SYSTEM CALL
+- Pauses a parent process from its own execution until the child is fully done
+- This makes sure some actions happen in a specific order
+
+#### ZOMBIE AND ORPHAN PROCESSES 
+- When a child process is done, the parent should call wait to read the childs exit status and remove it from the process table
+- If the parent does not call wait, the terminated child gets stuck there as a zombie process
+- If the parent terminated before the child, the child becomes an orphan
+
+#### EXEC SYSTEM CALL
+- Allows a process to stop running its current code and begin running a completely new program
+- A great example of this is when we replaced our program with an echo program
+- It overwrites its memory
+
+#### INIT IN UNIX
+- Init is the first user space process started by the OS at the very start of the system boot
+- It has PID value 1 and becomes parent of all the orphan processes 
+- Handles everything that is essential for a system to run correctly 
