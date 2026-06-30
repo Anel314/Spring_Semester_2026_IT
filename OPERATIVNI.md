@@ -375,3 +375,119 @@
 - Each process has a nice value either set by the user or system
 - Determines relative priority
 - Lower nice value means higher priority
+
+---
+
+### WEEK 5 - MEMORY MANAGEMENT 1
+#### SMALL INTRO
+- We are basically making sure that every responsibility within an operating system has the needed resources to execute itself
+- the os gives off an illusion of a private large adress space to each running program
+- that is one way to make an abstraction, and as we know abstraction is really important in OS
+
+#### EARLY DAYS
+- We did not have any abstraction
+- One process could only run at a time
+- All the libaries and the routines resided at the beginning of the memory
+
+#### LIMITATIONS OF EARLY SYSTEMS
+- Becuase only program could run at a time, there was little to no need for memory protection
+- This was known as `single contiguous memory management`
+- This was all pretty straight forwards for developrs but lacked efficiency as things became more complex
+
+#### MULTIPROGRAMMING
+- Multiple processes are running simultaneously and the OS switches between them
+- This made things more effective but then another question arised
+- How do we manage several programs in memory at once?
+
+#### TIME SHARING
+- Allowing interactive use by multiple users
+- Each process gets its own time slice, which gives the illusion of simulatenous execution
+- The time slice is very small
+- That way we get a more responsive, concurrent system
+
+#### NEED FOR MEMORY PROTECTION
+- We now have to protect one process from another, which is a huge issue
+- Without protections, lots of things could happen, such as:
+1) overwriting private data
+2) bugs
+3) even race conditions
+- The OS has to make sure each process has its own isolated environment
+
+#### ADDRESS SPACE ABSTRACTION
+- Everythin is solved by using adress space
+- It is a program's entire view of hte memory available in the system
+- Contains memory state, code, stack and heap
+
+#### TRANSPARENCY
+- Making sure the virtualization process remains completely invisible to the running program (which is sort of the whole point of abstraction, hiding stuff)
+- The program should not be aware its memory is being multiplexxed
+- This allows programmers to write code without having to worry where evrything is stored on the physical RAM
+- Also make sure that everything is efficient, so there is no significant slowdown
+
+#### MMU memory management unit
+- Hardware component that is used to translated virtual adresses into physical ones
+- Works together with the OS to make sure everything is protected and isolated
+- MMU uses page tables and TLB to perform everything as fast as possible
+
+#### TLBS translation lookaside buffers
+- small hardware cahce that stores recent virtual to physical adress translations
+- when a program accesses the memory, CPU first checks the TLB
+- If the translation is found (`hit`), the physical adress is returned qcuikly without consulting the OS
+- Otherwise (`miss`), the OS performs a physical adress lookup and continues the exectuion, which is of course, much slower than a hit
+
+#### PROTECTION
+- making sure that a process cannot access or affect ANY memory content outside of its own address space
+- this is called isolation
+
+#### VAs in practice
+- you never really know the actual virtual adress
+- the OS provides a code, but it is an illusion
+- you never really know where the data actually resides
+
+#### STACK VS HEAP
+- Stack is managed by the compiler, so it automatically allocates and deallocates space for local variables
+- When it comes to the heap, gotta do it yourself. 
+
+#### HOW STACK MEMORY WORKS
+- each function call creates a new stack frame that is pushed onto the stack
+- when the function returns the frame is popped
+- a stack frame is a block of memory on the stack that is for a function call
+- contains local variables, parameters and return address
+- stack pointer points at the top of the stack
+- frame pointer remains fixed within a function to provide stable access to variables
+- arguments are pushed first, then the return address and then we allocate space
+
+#### ALLOCATING MEMORY WITH MALLOC
+- `malloc()` is used to request a specific amount of bytes on the heap 
+- in Java the equivalent would be the `new` keyword
+- returns void pointer to the allocated space or returns NULL if the request fails
+- `sizeof()` is also paired with `malloc()` to make sure they are requesting an exact amount of space
+
+#### FREE()
+- to prevent memory from being wasted, `free()` must be called to release heap memory that we no longer need
+- takes a single pointer that was returned previously by the malloc call
+- it is not the users responsibility to track the exact size of the freed region, it is done by a library
+
+#### UNDER THE HOOD
+- `malloc()` is built on top of lower level system calls like `brk` and `sbrk`
+- They allow the memory allocation library to grow and shrink in size as needed
+- `mmap()` is used for anon memory regions that are not specific to any file
+
+#### SEGMENTATION FAULT
+- When a program tries to access a memory location that is not allowed to use
+- This can happen if you forget to allocate memory 
+
+#### MEMORY LEAK
+- When you forget to free the memory after using it
+
+#### BUFFER OVERFLOW
+- When a program writes data past the end of an allocated memory region
+- For example if we have an array going up to index 4, and we try to write something at index 5
+
+#### UNINITIALIZED READ AND INVALID FREE
+- Uninitialized area happens when a program accesss memory that has been allocated but not assigned a value, leading to unpredictable behaviour
+- An invalid free happens when we try to free memory that was not allocated dynamically
+
+#### ADVANCED MEMORY PROBLEMS
+- Dangling pointer - when a program frees memory but continues to use the pointer that refers to the free space
+- Double free - trying to release the same memory region twice
