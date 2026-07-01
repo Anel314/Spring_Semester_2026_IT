@@ -959,3 +959,117 @@ while (ready == 0)
 - Mutex puts the thread to sleep when the lock is held which avoids wasting cpu time but has context switching costs
 - Spin locks keep threads actively waiting in a loop, which is efficient for short tasks but wastes cpu cycles in a long run
 - Ticket locks ensure fairness by serving threads in order of arrival, which reduces starvation but increases waiting time due to strict ordering
+
+---
+### WEEK 10 - CONDITION VARIABLES AND SEMAPHORES
+#### INTRO TO SYNC NEEDS
+- We need synchronization primitives that allow threads to communicate state changes efficiently without wasting resources
+
+#### SPIN BASED WAITING
+- Inefficient
+- Modern operating systems have a better way
+- The idea is to put a thread to sleep and only wake it up when a certain condition is met
+
+#### CONDITION VARIABLES
+- An explicit queue that manages threads waiting for a specific state of execution to change 
+- When a condition is not met, a thread puts itself on this queue and etners a sleeping state to save processor time
+- Another thread that changes the program state can signal the condition variable to wake one or more waiting threads
+
+#### WAIT AND SIGNAL
+- `pthread_cond_wait()` is called when a thread must suspend itself until a condition is satisfied
+- `pthread_cond_signal()` is executed by a thread that has modified the shared state and wants to wake the sleeper thread
+- We also need to intialize these variables with `PTHREAD_COND_INITIALIZER`
+
+#### INTERACTION BETWEEN LOCKS AND WAIT
+- `wait()` always takes a mutex as a aprameter and assumes the lock is held by the caller
+- The responsibility of the wait function is to atomically release the lcok and put the calling thread to sleep
+- When the thread is woken up at some point by a signal, it must reacquire the mutex before it can return to the calling code
+
+#### PARENT WAITING FOR A CHILD
+- To implement a join, the parent uses a mutex and a condition variable
+- If the child has not finished, the parent calls wait, which relinquishes the lock and allows other threads to run
+- After completion, child acquires the lock, sets the state variable to indicate it has finished and signals the parent
+
+#### STATE VARIABLE AND WHY ITS IMPORTANT
+- A common mistake is trying to singal and wait without using a separate state vairable to track progress
+- Without it, a child might signal before the parent even starts waiting, causing the call to be lost FOREVER
+- The state makes sure the parent knows wheter it even needs to sleep based on what has already occured
+
+#### IMPORTANCE OF HOLDING THE MUTEX
+- Threads should always hold the associated lock when calling either `wait()` or `signal()` to prevent race conditions
+- A race condition can happen if the parent checks the condition, is interrupted and the child signals before the parent goes to sleep
+- The parent then would sleep indefinitely because it missed the signal
+
+#### MESA SEMANTICS AND SIGNALING HIT
+- In modern systems, signaling a thread is a hint that the state of the wolrd has changed
+- There is no guarantee the condition will still be true by the time the woken thread begins execution
+- This is known as `Mesa semantics`
+
+#### RULE OF WHILE LOOPS
+- Because of mesa semantics, threads should always use a while loop rather than an if statement to check conditions
+- Re checking is important because the thread cannot proceed if another thread snuck in in the meantime and changed the state
+
+#### PRODUCERS AND CONSUMERS
+- Producer generates the data and consumer receives it and processes it
+- Each runs at its own pace
+- A bounded buffer (fixed size storage) sits between them, absoring speed differences by holding items temporarily
+- Buffer is limited, so producers must wait when its full
+- On the other hand, consumers must wait until its empty
+- SO, CORRECT SYNCHRONIZATION IS CRUCIAL!!!!!!!
+
+#### PRODUCER CONSUMER PROBLEM
+- Involves one or more producer threads generating data and placing it into a shared bounded buffer
+- Consumer threads retrieve these items and process them in a synchronized way
+- A real world example is a web server where a producer puts an incoming http request into a queue for the worker threads / consumers to handle
+
+#### MANAGING BOUNDED BUFFER STATE
+- Producers must wait to add data if buffer is full
+- Consumers must wait for the buffer to empty
+- Using only one condition variable can cause problems where a producer accidentally wakes up another producer instead of a consumer
+- Now this results in a deadlock where all threads are asleep because the wrong type of thread was signaled
+
+#### SOLUTION: MULTIPLE CONDITION VARIABLES
+- We use two separate condition variables: `empty` and `fill`
+- Producers wait for `empty` and signall `fill`
+- Consumers wait on `fill` and signal `empty`
+- This way we are 100% sure producers only wake up consumers and vice versa
+
+#### CONDITIONS AND BROADCASTS
+- Sometimes a single signal is not enough because a signaling thread does not know which specific waiter can proceed
+- In a memory allocator, freeing a small amount of memory might satisfy one of many threads waiting for different sizes
+- `pthread_cond_broadcast` wakes all waiting threads, ensuring that anyone who can proceed has the chance to do so
+
+#### SEMAPHORES
+- A sync primitive that consists of an integer value manipulated by the two routines: `wait` and `post`
+- Semaphores maintain an internal counter that tracks the state of the resources
+- This was made by Dijkstra as a primitive that can both hold a lock and be a condition variable
+
+#### HOW IT WORKS
+- `sem_wait()` decrements the semaphore value and puts the thread to sleep if the resulting value is negative
+- `sem_post()` increments the value and wakes up the waiting thread if any are currently in the queue
+
+#### BINARY SEMAPHORES AS LOCKS
+- A semaphore can function as a lock if its value is init to 1, creating a `binary semaphore`
+- The first thread to call wait will decrement the value to 0 and proceed to the critical section
+- Subsequent threads will decrement the value further and sleep until the first thread calls `post()` to release the lock
+
+#### BOUNDED BUFFER PROBEM WITH SEMAPHORES
+- A semaphore solution for producer consumer problem uses two semaphores to track empty and full slots
+- Empty semaphore is initialized to the buffer's max capacity
+- Full semaphore starts at 0
+- This handles all the sync without additional state variables
+
+#### AVOIDING DEADLOCK WITH SEMAPHORE LOCK
+- When adding mutex to a semaphore based buffer, the order of wait calls is critical
+- MAKE SURE TO wait on the empty or full semaphore first and only then acquire the mutex for the critical section
+
+#### READER WRITER LOCK
+- Multiple threads can read a data structure while only writers have exclusive access
+- This is efficient for data structures who are often searched but barely updated
+- While its good for concurrency, it is more complex than a simple lock and can cause writer starvation
+
+#### DINING PHILOSOPHERS PROBLEM
+- There are 5 philosophers
+- They need two forks each to eat
+- If everyone grabs the fork first, we have a circular wait and a deadlock
+- Dijkstra's solution breaks this down by having one philosopher acquire his fork in a different order than the others
