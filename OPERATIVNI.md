@@ -733,3 +733,123 @@ int *ptr = malloc(20 * sizeof(int));
 #### INVERTED PAGE TABLE
 - Maintains a single entry for each physical page in the system rather than one per process
 - Provides extreme space saving but needs a hash table to function 
+
+---
+### WEEK 8 - CONCURRENCY AND THREADS
+#### INTRO
+- An illusion that multiple process are running simultaneously
+- Multiple points of execution - threads
+
+#### THREAD
+- Smallest unit of execution within a process
+- Sequence of instructions
+- Threads within the same process share the same address space and can share data structures
+- Each thread has its own PC, registers, state, similar to a small process
+
+#### THREAD VS PROCESS
+- Processes have separate address spaces, threads share memory within a process
+- Context switching betwen threads is cheaper because the address space is shared
+- Threads enable efficient communication but are complex due to shared memory
+
+#### THREADS AND CONTEXT SWITCHING
+- As we said threads have their own registers, PCs and everything
+- When a context switch appens, the current register is saved into a TCP (thread control block)
+- Thread switches do not require chaing the active page table, because the address space as we said twice before is the same
+
+#### MULTI THREADED ADDRESS SPACE
+- In a single threaded way, the address space has a single stack that grows downwards
+- Multithreaded way shares the heap and the code, but requires a separate stack for each thread to manage its own local variables
+- Instead of one large stack, we have multiple smaller ones 
+
+#### MANAGING THREAD STACK
+- Stack allocated variables are stored in a thread local storage within the stack of that specific thread
+- And also multiple stacks really do complicate things because the heap and stack can start growing towards each other from different ends
+- But this is in most cases manageable since most stack do not require that much memory
+
+#### WHY USE THREADS
+- They enable parallelism on multi core systems
+- Enchance responsiveness in web servers
+- Allow overlapping I/o and computation
+
+#### THREAD CREATION
+- `pthread_create` is the main way to do in it C
+- the process is similar to invoking a function but the difference is concurrent exeuction is done instead of serial one
+- must return a function pointer that accepts a void * and returns a void *
+
+#### WAITING FOR THREAD COMPLETION
+- `pthread_join` allows one thread to suspend its execution until another thread is done
+- Main thread waits for worker threads to finish, important in parallel execution
+- Also provides a way to retrieve the return value from the finishing thread via a pointer or a void pointer
+
+#### EXECUTION ORDER
+- OS scheduler takes care of everything
+- So what that means essentially, there is no guarantee that a thread that was created first will execute first 
+- The unpredictability is what makes concurrent programming wayy more complex than sequential programming 
+
+#### CHALLANGE OF SHARED DATA
+- Sharing the same address space is cool when you need to access data
+- But it can make a problem when multiple threads update the same variable
+- Threads can interfere with each other (race condition)
+
+#### RACE CONDITIONS
+- When multiple threads try to access the shared data concurrently without coordination
+- The final outcome depends on the timing and interleaving of threads
+- Because results vary on each run, the program can be described as indeterminate
+
+#### CRITICAL SECTION
+- Portion of a code that accesses a shared resource
+- Only one thread should access the critical section at a time to avoid conflicts
+- This is critical for writing correct concurrent programs
+
+#### MUTUAL EXCLUSION (MUTEX)
+- To solve race conditions, we use mutexes to make sure only one thread can be active within a specific critical section at any given time
+- Mutex primitives guarantee thta concurrent access to shared portion is deterministic and provides correct results
+- Implemented using `lock()`
+
+#### ATOMICITY
+- All or nothing (we know this from database systems)
+- Hardware cannot provide specific atomic instruction for every complex data structure, so we use locks to deal with it
+
+#### POSIX THREAD API
+- Provides functions for creating managing and sync of threads
+- Key components:
+1) creation
+2) joining
+3) locks
+4) condition variables
+
+#### DANGERS OF STACK RETURN VARIABLES
+- A common mistake is returning a pointer to a variable that was allocated on a thread's local stack
+- Because the thread stack was deallocated when the thread returns, the pointer will refre to invalid memory
+- To return safely, allocate memory on the heap or use a structure passed in by the caller
+
+#### IMPLEMENTING MUTEXES
+- `pthread_mutex_lock` and `pthread_mutex_unlock` for critical sections
+- If a thread tries to acquite a lock that is being held, it will get blocked and have to wait for its turn
+
+#### MUTEX INIT AND ERROR HANDLING
+- `pthread_mutex_init` has to be written first before a mutex is used
+- Also always check return codes because we want to avoid memory exhaustion
+- Something like this is common:
+```
+int rc = pthread_mutex_init(&lock, NULL);
+assert(rc == 0); // always check success
+```
+
+#### CONDITION VARIABLES AND SIGNALING
+- Used when one thread needs to wait for a state change or a signal from another thread
+- `pthread_cond_wait`, which puts a thread to sleep until its turn comes up
+- `pthread_cond_signal` to wake up a sleeping thread
+- Always check the waiting condition in a while loop rather than using an if statement
+- Why? because spurious wake ups can happen even if the condition has not changed
+
+#### AVOID AD HOC SYNC
+- It is tempting to use a simple flag variable and a spin oop to wait for another thread, but do not do it
+
+```
+while (ready == 0)
+    ; // spin
+```
+
+- Spinning wastes cpu cycles and is prone to bugs
+- Use formal condition variables and mutexes
