@@ -786,7 +786,7 @@ int *ptr = malloc(20 * sizeof(int));
 - So what that means essentially, there is no guarantee that a thread that was created first will execute first 
 - The unpredictability is what makes concurrent programming wayy more complex than sequential programming 
 
-#### CHALLANGE OF SHARED DATA
+#### CHALLENGE OF SHARED DATA
 - Sharing the same address space is cool when you need to access data
 - But it can make a problem when multiple threads update the same variable
 - Threads can interfere with each other (race condition)
@@ -853,3 +853,109 @@ while (ready == 0)
 
 - Spinning wastes cpu cycles and is prone to bugs
 - Use formal condition variables and mutexes
+
+---
+### WEEK 9 - LOCKS
+#### WHAT IS IT
+- Basically a variable that holds the current state of the resource it is protecting
+- Its either available or its not
+
+#### SEMANTICS AND OWNERSHIP
+- `lock()` attempts to acquire the lock and if its free it can, otherwise it has to wait
+- `unlock()` frees the lock so the waiting threads can acquire it
+
+#### GRANULARITY
+- Coarse grained uses one large lock for many different critical sections, which can limit concurrency
+- Fine grained protects different data structures with unique locks 
+
+#### CRITERIA FOR EVALUATING LOCKS
+1) correctness - ability to provide a mutex
+2) fairness - every thread will eventually get the chance to acquire a lock without starving
+3) performance - overhead added by the lock
+
+#### CONTROLLING INTERRUPTS
+- A good approach is to disable interrupts before a critical section 
+- We need to run a thread that cannot be preempted, making the execution atomic
+- Simple to implement, but gives privileged operations to applications, so it is a security risk
+
+#### LIMITATIONS OF DISABLING INTERRUPTS
+- You cannot disable an interrupt on multiprocessors systems, as threads on other CPUs can still access the critical sections
+- Long periods w/o interrupts can cause lost signals from other hardware devices
+- Modern cpus often execute the insturction to mask or unmask interrupt slowly
+
+#### BAD IDEA: SINGLE FLAG
+- Using `0` for available and `1` for not
+- An interrupt can occur between the test and set 
+
+#### SPIN WAITING 
+- When a thread keeps checking a flag value in a loop, it is known as spin waiting
+- Wasteful on single processor systems
+- In more advanced hardware systems there are other ways to do this
+
+#### TEST AND SET
+- AKA atomic exchange, is a hardware primitive that returns an old value while simulatenously updating the new one
+- Guarantess that the sequence of reading and writing cannot be interrupted
+- This is fundamental to a thing we call a spin lock
+
+#### WORKING SPIN LOCK
+- `lock()` calls test and set in a loop until it receives a 0
+- The atomic nature of it all makes sure that only one thread can access the 0 and set it to 1
+- This requires a preemptive scheduler that will eventually interrupt the spinning thread to lock the holder (THIS IS FOR A SINGLE CPU ONLY)
+
+#### SPIN LOCK PERFORMANCE
+- Good for multiple CPUs where we have several critical sections, and they are short. The waiter spins only for a few cycles
+- But on a single CPU, a thread might spin for an entire time slice before the scheduler switches back to the thread holding the lock
+- Also no fairness is guaranteed so there is that
+
+#### COMPARE AND SWAP
+- Tests if a vlue matches an expected value before performing an update
+- If it matches, update happens, otherwise, the instruction does nothing and returns the current value
+- More powerful than test and set and is used for wait-free sync
+
+#### LOAD LINKED AND STORE CONDITIONAL
+- Store conditional only succeeds if no other thread has updated the memory address since the previous load linked call
+- If two threads both try to update the lcok flag, only one of them will succeed while the other has to retry
+
+#### FETCH AND ADD
+- Atomically increments a value and returns the old value
+- This allows ticket lock creation, which uses a ticket and a turn to order thread access
+
+#### TICKET LOCK
+- Ticket locks assign each thread a turn number
+- This is fair because threads are served in order in which they received the ticket number (FIFO)
+- This guarantess a progress for all threads, every thread will at one point get its turn
+
+#### YIELD STRATEGY
+- To avoid the waste of spinning for a full time slice, a thread can yield the cpu when it finds a lock is held
+- `yield()` moves a thread from running state to ready state
+- Better than pure spinning, but the cost of context switch is a downside
+
+#### QUEUES AND SLEEPING
+- Put waiting threads to sleep, this is the best way
+- There are special routines for doing so
+- The wiaters are placed in a queue and everything is in control
+
+#### WAKEUP / WAITING RACE
+- A potential race condition can happen where a thread decides to sleep, but is interrupted by the lcok holder releasing hte lock before the sleep occurs
+- Wake up is sent before the thread actually calls sleep, and the signal might be lost causing the thread to sleep forever
+
+#### FUTEX 
+- `futex_wait()` puts a thread to sleep only if the value at a specific address matches what the thread expects
+
+#### MUTEXES AND HOW TO CODE THEM
+- A lock is reffered to as a mutex, which is short for mutual exclusion
+- You must initialize a mutex first as mentioned in week before
+
+#### WHY NOT ALWAYS USE SLEEPING MUTEXES
+- If a critical section is very short, it simply is not worth it
+- In this case, it is much more efficient to just wait for a brief period, rather than going through the whole sleep signal cycle
+
+#### TWO PHASE LOCKS
+- Combines spinning and sleeping to get the best of both worlds
+- In the first phase, the thread spins for a short period hoping the lock will be released quickly to avoid a context switch
+- If the lock is still not acquired, the thread enters the second phase and is put to sleep
+
+#### MUTEX VS SPIN LOCKS VS TICKET LOCKS
+- Mutex puts the thread to sleep when the lock is held which avoids wasting cpu time but has context switching costs
+- Spin locks keep threads actively waiting in a loop, which is efficient for short tasks but wastes cpu cycles in a long run
+- Ticket locks ensure fairness by serving threads in order of arrival, which reduces starvation but increases waiting time due to strict ordering
