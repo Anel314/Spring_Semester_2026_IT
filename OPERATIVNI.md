@@ -615,3 +615,121 @@ int *ptr = malloc(20 * sizeof(int));
 - Recursively divides free space by two until a block of sufficient size is found
 - Makes coalescing simple
 - Drawback is that it can suffer from internal fragemntation
+
+---
+
+### WEEK 7 - MEMORY MANAGEMENT 3 (A DOKLE VISEEEEE)
+#### INTRODUCING PAGING
+- Chopping up an address space into fixed size chunks known as pages
+- Physical memory is known as an array of fixed sized slots known as page frames
+
+#### ADVANTAGES OF PAGING
+- Simple management because the OS only needs the free list of free page grames
+- No external fragmentation, because everything is of identical size
+
+#### IMPORTANT ADDRESS SPACE CONCEPTS
+- A virtual address space is divided into several units
+- Each unit assigned has a virtual page number (vpn)
+- Physical memory frames are mapped to the virtual ones to make sure the process can access the required data
+
+#### PAGE TABLE
+- To track the location of each vrtiaul page in physical memory, we use a page table
+- Stores translation of each virtual page to its corresponding physical frame
+- We need a DIFFERENT page table for each active process
+
+#### VIRTUAL ADDRESS COMPONENTS
+- Two primary components:
+1) virtual page number
+2) offset
+- Bits are used to select which specific page of the address space is being accessed by the processor
+- Offset bits specify which byte within that page is the target of the memory operation 
+
+#### TRANSLATION PROCESS
+- when a VA is generated, the hardware must combine with the os to translate it into a physical one
+- VPN is used to retirve the physical page number (FPN)
+- A physical address is then formed and is combined by getting the FPN with the original offset, not translated ofc
+
+#### PTE page table entry
+- Contains a valid bit to indicate whether the virtual to physical translation is currently is in use
+- Protection bits are there to determine whether a page can be read, written to or executed by the running process
+- Present bit is for swapping and the dirty bit is for tracking if hte page has been modified
+
+#### HOW ITS STORED
+- Page tables are huge by nature so they are stored in physical memory
+- Page table register, aka a PTR, is used by the hardware to locate the starting address of the current process's table
+- Every virtual memory reference NEEDS at least one extra access to physical memory
+
+#### LINEAR PAGE TABLES
+- Linear structure is the most simple for a page table
+- This is essentially a basic array
+- Nema tu neke pameti
+- VPN is used for indexing and finding the correct entry
+- The only imporant thing to note is these can become very large for systems with wide address spaces which is not great
+
+#### PAGING COSTS
+- Paging can slow down a system because each instruction fetch needs to load data and an additional lookup
+- It can double the time needed for memory operations
+- So that is why hardware mechanisms were developed to bypass this
+
+#### INTRO TO TLB!!!!!!
+- Translation looksaside buffer is a small hardware cache designed to store popular address translations
+- It integrated into the processors memory management unit (MMU), and it gives instant translation of virtual addresses
+- TLB IS ALWAYS CHECKED FIRST
+- Another thing important for a tlb is `hit` and `miss` but we mentioned this earlier and i am too lazy to write about it again
+
+#### LOCALITY AND PERFORMANCE
+- Performance of a tlb relies on locality, where accessing one element of an array makes nearby elements faster to search
+- Temporal locality is important because recently accessed translations are likely to be used again
+- Programs that have high locality have high hit rates, sometimes even reaching 100%
+
+#### TLB MISSES
+- Hardware managed TLBs are responsible for updating the TLB on a miss
+- Modern sotfware managed TLBs trigger an exception on a miss for the OS to handle
+- The trap handler must be carefully written to handle all of this
+
+#### WHAT DOES A TLB STORE?
+1) VPN AND FPN
+2) control bits: valid bit, protection bit, dirty bit SOMETIMES
+- Modern TLBs store between 64 to 4096 entries
+
+#### TLBS AND CONTEXT SWITCHING
+- When we perform a context switch, the tlb entries specific to a single process becomes invalid
+- A possible solution is to flush the entire tlb on every context switch BUT THIS IS COSTLY
+- Advanced systems use an address space identifier (ASID) bit to tag TLB entries, allowing multiple processes to share the cache in a safe way
+
+#### TLB REPLACEMENT POLICIES
+- When the tlb is full and needs to add another entry, it must choose an existing entry to remove based on a replacement policy
+- A common approach is Least Recently Used (LRU), which removes the entry that has not been accessed for a long time
+- Another way is random replacement, easy to implement and can avoid cases where RLU behaves poorly
+
+#### SOLVING THE SIZE PROBLEM
+- One way is to reduce the size of a page table is to increase the size of each individual page
+- Larger pages do cause less entires in a table, but they also lead to less fragmentation issues
+- Real world database systems sometimes use this (superpages)
+
+#### HYBRID PAGING AND SEGMENTATION
+- A hybrid approach combines paging and segmentation by having a separate page table for each logical segment (code, heap and stack)
+- This saves memory
+
+#### MULTI LEVEL PAGE TABLES
+- Stuff is organized into a tree like structure to eliminate unallocated regions
+- Page directory is used to see which parts of the table are currently allocated and valid
+- If an entire range is unused, the page of the page table is never created 
+
+#### MULTI LEVEL TRANSLATION
+1) page directory index is used to find the correct page table
+2) page table index is used to locate the specific entry
+3) offset is used to locate the correct address within the page table
+
+#### MULTI LEVEL PAGING: MORE THAN TWO LEVELS
+- When a page directory is too large to fit a single page, additional levels are added forming a deeper stree structure
+- The VA is split into multiple indices
+
+#### PROS AND CONS
+- Reduces memory usage
+- Simplifies memory management
+- Increases translation overhead
+
+#### INVERTED PAGE TABLE
+- Maintains a single entry for each physical page in the system rather than one per process
+- Provides extreme space saving but needs a hash table to function 
